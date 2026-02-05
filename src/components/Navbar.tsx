@@ -28,6 +28,9 @@ export default function Navbar() {
             <Link href="/#pricing" className="text-brand-muted hover:text-white transition-colors text-sm font-body">
               Pricing
             </Link>
+            <Link href="/blog" className="text-brand-muted hover:text-white transition-colors text-sm font-body">
+              Blog
+            </Link>
             <Link
               href="/app"
               className="px-5 py-2 bg-gradient-to-r from-brand-fuchsia to-brand-yellow rounded-btn font-heading font-semibold text-sm text-white hover:opacity-90 transition-opacity"
@@ -59,6 +62,9 @@ export default function Navbar() {
             </Link>
             <Link href="/#pricing" className="block text-brand-muted hover:text-white transition-colors text-sm font-body">
               Pricing
+            </Link>
+            <Link href="/blog" className="block text-brand-muted hover:text-white transition-colors text-sm font-body">
+              Blog
             </Link>
             <Link
               href="/app"

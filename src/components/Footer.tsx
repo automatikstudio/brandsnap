@@ -39,6 +39,11 @@ export default function Footer() {
                   Generate Kit
                 </Link>
               </li>
+              <li>
+                <Link href="/blog" className="text-brand-muted hover:text-white transition-colors text-sm font-body">
+                  Blog
+                </Link>
+              </li>
             </ul>
           </div>
 
