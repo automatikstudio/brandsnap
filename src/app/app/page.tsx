@@ -1,38 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import {
+  VersionBadge,
+  VersionHistoryPanel,
+  DiffViewer,
+  BrandVaultButton,
+} from "@/components/BrandVault";
+import {
+  BrandVersion,
+  BrandKit,
+  saveBrandVersion,
+  getVersionsForBusiness,
+  getVersionCount,
+} from "@/lib/brandVault";
 
 interface BrandColor {
   name: string;
   hex: string;
   usage: string;
-}
-
-interface BrandKit {
-  colors: BrandColor[];
-  fonts: {
-    heading: { name: string; weight: string; style: string };
-    body: { name: string; weight: string; style: string };
-    reasoning: string;
-  };
-  brandVoice: {
-    tone: string;
-    taglines: string[];
-    description: string;
-  };
-  logoDirection: {
-    concept: string;
-    style: string;
-    elements: string[];
-  };
-  socialMedia: {
-    profileGuidelines: string;
-    coverGuidelines: string;
-    colorApplications: string[];
-    platforms: { name: string; profileSize: string; coverSize: string }[];
-  };
 }
 
 const industries = [
@@ -68,6 +56,23 @@ export default function AppPage() {
   const [description, setDescription] = useState("");
   const [stylePreference, setStylePreference] = useState("Modern");
 
+  // Brand Vault state
+  const [currentVersion, setCurrentVersion] = useState<BrandVersion | null>(null);
+  const [versionCount, setVersionCount] = useState(0);
+  const [showVault, setShowVault] = useState(false);
+  const [showDiff, setShowDiff] = useState(false);
+  const [diffVersions, setDiffVersions] = useState<{
+    old: BrandVersion;
+    new: BrandVersion;
+  } | null>(null);
+
+  // Update version count when business name changes
+  useEffect(() => {
+    if (businessName) {
+      setVersionCount(getVersionCount(businessName));
+    }
+  }, [businessName, currentVersion]);
+
   const handleGenerate = async () => {
     if (!businessName.trim() || !description.trim()) {
       setError("Please fill in your business name and description.");
@@ -96,6 +101,17 @@ export default function AppPage() {
 
       const data = await response.json();
       setBrandKit(data);
+      
+      // Save to Brand Vault
+      const savedVersion = saveBrandVersion(
+        businessName.trim(),
+        industry,
+        stylePreference,
+        data
+      );
+      setCurrentVersion(savedVersion);
+      setVersionCount(getVersionCount(businessName.trim()));
+      
       setStep(3);
 
       // Track generation
@@ -131,6 +147,26 @@ export default function AppPage() {
     setDescription("");
     setStylePreference("Modern");
     setError("");
+    setCurrentVersion(null);
+    setVersionCount(0);
+  };
+
+  // Handle restoring a previous version
+  const handleRestoreVersion = (version: BrandVersion) => {
+    setBrandKit(version.brandKit);
+    setCurrentVersion(version);
+    setBusinessName(version.businessName);
+    setIndustry(version.industry);
+    setStylePreference(version.style);
+    setVersionCount(getVersionCount(version.businessName));
+    setShowVault(false);
+  };
+
+  // Handle opening the diff viewer
+  const handleCompareVersions = (oldVersion: BrandVersion, newVersion: BrandVersion) => {
+    setDiffVersions({ old: oldVersion, new: newVersion });
+    setShowDiff(true);
+    setShowVault(false);
   };
 
   return (
@@ -308,9 +344,23 @@ export default function AppPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h2 className="font-heading font-bold text-2xl text-white">
-                  Brand Kit for <span className="gradient-text">{businessName}</span>
-                </h2>
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <h2 className="font-heading font-bold text-2xl text-white">
+                    Brand Kit for <span className="gradient-text">{businessName}</span>
+                  </h2>
+                  {currentVersion && versionCount > 0 && (
+                    <VersionBadge
+                      version={currentVersion.version}
+                      totalVersions={versionCount}
+                      onClick={() => setShowVault(true)}
+                    />
+                  )}
+                </div>
+                {versionCount > 1 && (
+                  <p className="text-brand-muted text-sm font-body">
+                    🔒 {versionCount} versions saved in your Brand Vault
+                  </p>
+                )}
               </div>
 
               {/* Color Palette */}
@@ -505,6 +555,12 @@ export default function AppPage() {
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                {versionCount > 1 && (
+                  <BrandVaultButton
+                    businessName={businessName}
+                    onClick={() => setShowVault(true)}
+                  />
+                )}
                 <button
                   onClick={resetForm}
                   className="px-8 py-3 border border-zinc-700 rounded-btn font-heading font-semibold text-white hover:border-brand-fuchsia hover:text-brand-fuchsia transition-all"
@@ -513,6 +569,29 @@ export default function AppPage() {
                 </button>
               </div>
             </div>
+          )}
+
+          {/* Brand Vault Modal */}
+          <VersionHistoryPanel
+            businessName={businessName}
+            currentVersionId={currentVersion?.id || ""}
+            onRestore={handleRestoreVersion}
+            onCompare={handleCompareVersions}
+            onClose={() => setShowVault(false)}
+            isOpen={showVault}
+          />
+
+          {/* Diff Viewer Modal */}
+          {diffVersions && (
+            <DiffViewer
+              oldVersion={diffVersions.old}
+              newVersion={diffVersions.new}
+              onClose={() => {
+                setShowDiff(false);
+                setDiffVersions(null);
+              }}
+              isOpen={showDiff}
+            />
           )}
         </div>
       </main>
