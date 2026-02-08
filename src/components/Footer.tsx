@@ -69,17 +69,31 @@ export default function Footer() {
           <p className="text-brand-muted text-sm font-body">
             © {new Date().getFullYear()} BrandSnap. All rights reserved.
           </p>
-          <p className="text-brand-muted text-sm font-body">
-            Built by{" "}
-            <a
-              href="https://automatik.studio"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-brand-fuchsia hover:text-brand-yellow transition-colors"
-            >
-              Automatik.studio
-            </a>
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-4 text-brand-muted text-sm font-body">
+            <p>
+              Built by{" "}
+              <a
+                href="https://automatik.studio"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-fuchsia hover:text-brand-yellow transition-colors"
+              >
+                Automatik.studio
+              </a>
+            </p>
+            <span className="hidden sm:inline">•</span>
+            <p>
+              BrandSnap is listed on{" "}
+              <a
+                href="https://aitoolzdir.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-fuchsia hover:text-brand-yellow transition-colors"
+              >
+                AI Toolz Dir
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
